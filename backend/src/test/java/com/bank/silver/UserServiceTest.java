@@ -1,13 +1,15 @@
 package com.bank.silver;
 
+import com.bank.silver.exception.LoginFailedException;
+import com.bank.silver.user.DTO.LoginRequest;
 import com.bank.silver.user.entity.User;
 import com.bank.silver.user.DTO.UserRegisterRequest;
 import com.bank.silver.user.repository.UserRepository;
 import com.bank.silver.user.service.UserService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,6 +24,14 @@ public class UserServiceTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    private void registerTestUser() {
+        UserRegisterRequest request = new UserRegisterRequest("john", "password123", "john@example.com");
+        userService.register(request);
+    }
 
     @Test
     void join_success() {
@@ -51,6 +61,20 @@ public class UserServiceTest {
     }
 
     @Test
+    void join_duplicate_email_exception() {
+        //given
+        var request1 = new UserRegisterRequest("john1", "password123", "john@example.com");
+        var request2 = new UserRegisterRequest("john2", "password999", "john@example.com");
+
+        userService.register(request1);
+
+        //when & then
+        assertThatThrownBy(() -> userService.register(request2))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("email is already taken");
+    }
+
+    @Test
     void if_password_length_less_than_8_exception() {
         //given
         var request = new UserRegisterRequest("john", "short", "john@exception.com");
@@ -72,5 +96,23 @@ public class UserServiceTest {
         //then
         var found = userRepository.findByUsername("john").orElseThrow();
         assertThat(found.getEmail()).isEqualTo("john@example.com");
+    }
+
+    @Test
+    void loginSuccess() {
+        registerTestUser();
+
+        LoginRequest loginRequest = new LoginRequest("john", "password123");
+        User user = userService.login(loginRequest);
+        assertThat(user.getUsername()).isEqualTo("john");
+    }
+
+    @Test
+    void loginFail_wrongPassword() {
+        registerTestUser();
+
+        LoginRequest loginRequest = new LoginRequest("john", "password456");
+        assertThatThrownBy(() -> userService.login(loginRequest))
+                .isInstanceOf(LoginFailedException.class);
     }
 }

@@ -1,9 +1,11 @@
 package com.bank.silver.user.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
 @Entity
 @Table(name = "users")
+@Getter
 public class User {
 
     @Id
@@ -22,17 +24,5 @@ public class User {
         this.username = username;
         this.password = password;
         this.email = email;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public String getEmail() {
-        return email;
     }
 }
