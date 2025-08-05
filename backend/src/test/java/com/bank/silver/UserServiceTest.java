@@ -2,21 +2,26 @@ package com.bank.silver;
 
 import com.bank.silver.user.entity.User;
 import com.bank.silver.user.DTO.UserRegisterRequest;
+import com.bank.silver.user.repository.UserRepository;
 import com.bank.silver.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@SpringBootTest
+@Transactional
 public class UserServiceTest {
 
+    @Autowired
     private UserService userService;
 
-    @BeforeEach
-    void setUp() {
-        userService = new UserService();
-    }
+    @Autowired
+    private UserRepository userRepository;
 
     @Test
     void join_success() {
@@ -54,5 +59,18 @@ public class UserServiceTest {
         assertThatThrownBy(() -> userService.register(request))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("password_should_be_more_than_8_characters");
+    }
+
+    @Test
+    void register_shouldSaveUserInDatabase() {
+        //given
+        var request = new UserRegisterRequest("john", "securepass", "john@example.com");
+
+        //when
+        User savedUser = userService.register(request);
+
+        //then
+        var found = userRepository.findByUsername("john").orElseThrow();
+        assertThat(found.getEmail()).isEqualTo("john@example.com");
     }
 }

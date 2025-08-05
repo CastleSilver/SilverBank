@@ -25,7 +25,7 @@ repositories {
 }
 
 dependencies {
-	implementation("org.springframework.data:spring-data-jpa:3.5.1")
+	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.security:spring-security-core:6.5.1")
 	implementation("org.postgresql:postgresql:42.7.3")
