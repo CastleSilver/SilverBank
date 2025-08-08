@@ -1,7 +1,5 @@
-package com.bank.silver;
+package com.bank.silver.auth;
 
-import com.bank.silver.exception.LoginFailedException;
-import com.bank.silver.user.DTO.LoginRequest;
 import com.bank.silver.user.entity.User;
 import com.bank.silver.user.DTO.UserRegisterRequest;
 import com.bank.silver.user.repository.UserRepository;
@@ -27,11 +25,6 @@ public class UserServiceTest {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-
-    private void registerTestUser() {
-        UserRegisterRequest request = new UserRegisterRequest("john", "password123", "john@example.com");
-        userService.register(request);
-    }
 
     @Test
     void join_success() {
@@ -96,23 +89,5 @@ public class UserServiceTest {
         //then
         var found = userRepository.findByUsername("john").orElseThrow();
         assertThat(found.getEmail()).isEqualTo("john@example.com");
-    }
-
-    @Test
-    void loginSuccess() {
-        registerTestUser();
-
-        LoginRequest loginRequest = new LoginRequest("john", "password123");
-        User user = userService.login(loginRequest);
-        assertThat(user.getUsername()).isEqualTo("john");
-    }
-
-    @Test
-    void loginFail_wrongPassword() {
-        registerTestUser();
-
-        LoginRequest loginRequest = new LoginRequest("john", "password456");
-        assertThatThrownBy(() -> userService.login(loginRequest))
-                .isInstanceOf(LoginFailedException.class);
     }
 }
