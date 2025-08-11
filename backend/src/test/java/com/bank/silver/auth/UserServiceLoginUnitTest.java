@@ -76,4 +76,20 @@ public class UserServiceLoginUnitTest {
                 .isInstanceOf(AccountLockedException.class);
         verify(userRepository, never()).save(any());
     }
+
+    @Test
+    void accountLocksAfterMaxFailedAttemps() {
+        User user = new User("john", "$hash$", "john@example.com");
+        given(userRepository.findByUsername("john")).willReturn(Optional.of(user));
+        given(passwordEncoder.matches(any(), any())).willReturn(false);
+
+        for (int i = 0; i < 5; i++) {
+            assertThatThrownBy(() -> userService.login(new LoginRequest("john", "password")))
+                    .isInstanceOf(LoginFailedException.class);
+        }
+
+        assertThat(user.isLocked()).isTrue();
+        assertThatThrownBy(() -> userService.login(new LoginRequest("john", "password")))
+                .isInstanceOf(AccountLockedException.class);
+    }
 }
