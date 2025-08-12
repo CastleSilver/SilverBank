@@ -2,6 +2,7 @@ package com.bank.silver.account;
 
 import com.bank.silver.account.entity.Account;
 import com.bank.silver.account.service.AccountService;
+import com.bank.silver.account.util.AccountNumberGenerator;
 import com.bank.silver.user.DTO.UserRegisterRequest;
 import com.bank.silver.user.entity.User;
 import com.bank.silver.user.repository.UserRepository;
@@ -13,6 +14,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.awaitility.Awaitility.given;
 
 @SpringBootTest
 @Transactional
