@@ -42,7 +42,7 @@ public class AccountServiceRefactorTest {
         when(accountNumberGenerator.generate()).thenReturn(generatedNumber);
         when(accountRepository.existsByAccountNumber(generatedNumber)).thenReturn(false);
 
-        Account fakeAccount = new Account(generatedNumber, BigDecimal.ZERO.longValue(), savedUser);
+        Account fakeAccount = new Account(generatedNumber, BigDecimal.ZERO, savedUser);
 
         when(accountRepository.save(any(Account.class))).thenReturn(fakeAccount);
 
