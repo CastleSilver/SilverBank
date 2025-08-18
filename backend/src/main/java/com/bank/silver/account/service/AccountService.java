@@ -38,10 +38,28 @@ public class AccountService {
         Account account = accountRepository.findByAccountNumber(accountNumber)
                 .orElseThrow(() -> new IllegalArgumentException("Account not found"));
 
+
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Deposit amount must be positive");
         }
         account.deposit(amount);
+
+        return accountRepository.save(account);
+    }
+
+    @Transactional
+    public Account withdraw(String accountNumber, BigDecimal amount) {
+        Account account = accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new IllegalArgumentException("Account not found"));
+
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Withdraw amount must be positive");
+        }
+
+        if (amount.compareTo(account.getBalance()) > 0) {
+            throw new IllegalArgumentException("Insufficient balance");
+        }
+        account.withdraw(amount);
 
         return accountRepository.save(account);
     }
