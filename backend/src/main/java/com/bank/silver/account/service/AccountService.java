@@ -63,4 +63,22 @@ public class AccountService {
 
         return accountRepository.save(account);
     }
+
+    @Transactional
+    public void transfer(String sendAccount, String receiveAccount, BigDecimal amount) {
+        Account sender = accountRepository.findByAccountNumber(sendAccount)
+                .orElseThrow(() -> new IllegalArgumentException("Account not found"));
+        Account receiver = accountRepository.findByAccountNumber(receiveAccount)
+                .orElseThrow(() -> new IllegalArgumentException("Account not found"));
+
+        if (sender.getBalance().compareTo(amount) < 0) {
+            throw new IllegalArgumentException("Insufficient balance");
+        }
+
+        sender.withdraw(amount);
+        receiver.deposit(amount);
+
+        accountRepository.save(sender);
+        accountRepository.save(receiver);
+    }
 }
