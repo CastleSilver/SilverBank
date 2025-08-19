@@ -33,7 +33,7 @@ dependencies {
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-	testImplementation("org.mockito:mockito-core")
+	testImplementation("org.mockito:mockito-core:5.11.0")
 	testImplementation("org.assertj:assertj-core")
 	implementation("io.jsonwebtoken:jjwt:0.9.1")
 }

@@ -1,6 +1,7 @@
 package com.bank.silver.account.service;
 
 import com.bank.silver.account.entity.Account;
+import com.bank.silver.account.entity.TransactionType;
 import com.bank.silver.account.repository.AccountRepository;
 import com.bank.silver.account.util.AccountNumberGenerator;
 import com.bank.silver.user.entity.User;
@@ -10,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +22,8 @@ public class AccountService {
     @Autowired
     private AccountNumberGenerator accountNumberGenerator;
 
+    @Autowired
+    private TransactionService transactionService;
 
     public Account createAccount(User owner) {
         String accountNumber;
@@ -43,6 +45,7 @@ public class AccountService {
             throw new IllegalArgumentException("Deposit amount must be positive");
         }
         account.deposit(amount);
+        transactionService.recordTransaction(account, amount, TransactionType.DEPOSIT);
 
         return accountRepository.save(account);
     }
@@ -60,23 +63,33 @@ public class AccountService {
             throw new IllegalArgumentException("Insufficient balance");
         }
         account.withdraw(amount);
+        transactionService.recordTransaction(account, amount, TransactionType.WITHDRAW);
 
         return accountRepository.save(account);
     }
 
     @Transactional
     public void transfer(String sendAccount, String receiveAccount, BigDecimal amount) {
+        if (sendAccount.equals(receiveAccount)) {
+            throw new IllegalArgumentException("Cannot transfer to the same account");
+        }
         Account sender = accountRepository.findByAccountNumber(sendAccount)
-                .orElseThrow(() -> new IllegalArgumentException("Account not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Sender not found"));
         Account receiver = accountRepository.findByAccountNumber(receiveAccount)
-                .orElseThrow(() -> new IllegalArgumentException("Account not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Receiver not found"));
 
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Amount must be positive");
+        }
         if (sender.getBalance().compareTo(amount) < 0) {
             throw new IllegalArgumentException("Insufficient balance");
         }
 
         sender.withdraw(amount);
+        transactionService.recordTransaction(sender, amount, TransactionType.TRANSFER_OUT);
+
         receiver.deposit(amount);
+        transactionService.recordTransaction(receiver, amount, TransactionType.TRANSFER_IN);
 
         accountRepository.save(sender);
         accountRepository.save(receiver);
