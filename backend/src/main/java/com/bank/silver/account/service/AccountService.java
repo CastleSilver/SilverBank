@@ -69,13 +69,13 @@ public class AccountService {
     }
 
     @Transactional
-    public void transfer(String sendAccount, String receiveAccount, BigDecimal amount) {
-        if (sendAccount.equals(receiveAccount)) {
+    public Account[] transfer(String sendAccountNumber, String receiveAccountNumber, BigDecimal amount) {
+        if (sendAccountNumber.equals(receiveAccountNumber)) {
             throw new IllegalArgumentException("Cannot transfer to the same account");
         }
-        Account sender = accountRepository.findByAccountNumber(sendAccount)
+        Account sender = accountRepository.findByAccountNumber(sendAccountNumber)
                 .orElseThrow(() -> new IllegalArgumentException("Sender not found"));
-        Account receiver = accountRepository.findByAccountNumber(receiveAccount)
+        Account receiver = accountRepository.findByAccountNumber(receiveAccountNumber)
                 .orElseThrow(() -> new IllegalArgumentException("Receiver not found"));
 
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
@@ -93,5 +93,7 @@ public class AccountService {
 
         accountRepository.save(sender);
         accountRepository.save(receiver);
+
+        return new Account[]{sender, receiver};
     }
 }

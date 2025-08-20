@@ -36,6 +36,7 @@ dependencies {
 	testImplementation("org.mockito:mockito-core:5.11.0")
 	testImplementation("org.assertj:assertj-core")
 	implementation("io.jsonwebtoken:jjwt:0.9.1")
+	testImplementation("com.h2database:h2")
 }
 
 tasks.withType<Test> {
