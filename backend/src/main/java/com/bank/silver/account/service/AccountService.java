@@ -37,8 +37,7 @@ public class AccountService {
 
     @Transactional
     public Account deposit(String accountNumber, BigDecimal amount) {
-        Account account = accountRepository.findByAccountNumber(accountNumber)
-                .orElseThrow(() -> new IllegalArgumentException("Account not found"));
+        Account account = getAccountByAccountNumber(accountNumber);
 
 
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
@@ -52,8 +51,7 @@ public class AccountService {
 
     @Transactional
     public Account withdraw(String accountNumber, BigDecimal amount) {
-        Account account = accountRepository.findByAccountNumber(accountNumber)
-                .orElseThrow(() -> new IllegalArgumentException("Account not found"));
+        Account account = getAccountByAccountNumber(accountNumber);
 
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Withdraw amount must be positive");
@@ -73,10 +71,8 @@ public class AccountService {
         if (sendAccountNumber.equals(receiveAccountNumber)) {
             throw new IllegalArgumentException("Cannot transfer to the same account");
         }
-        Account sender = accountRepository.findByAccountNumber(sendAccountNumber)
-                .orElseThrow(() -> new IllegalArgumentException("Sender not found"));
-        Account receiver = accountRepository.findByAccountNumber(receiveAccountNumber)
-                .orElseThrow(() -> new IllegalArgumentException("Receiver not found"));
+        Account sender = getAccountByAccountNumber(sendAccountNumber);
+        Account receiver = getAccountByAccountNumber(receiveAccountNumber);
 
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Amount must be positive");
@@ -95,5 +91,12 @@ public class AccountService {
         accountRepository.save(receiver);
 
         return new Account[]{sender, receiver};
+    }
+
+    public Account getAccountByAccountNumber(String accountNumber) {
+        Account account = accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new IllegalArgumentException("Account not found"));
+
+        return account;
     }
 }

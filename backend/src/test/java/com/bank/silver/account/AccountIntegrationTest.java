@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -106,5 +107,30 @@ public class AccountIntegrationTest {
 
         assertThat(from.getBalance()).isEqualByComparingTo("800");
         assertThat(to.getBalance()).isEqualByComparingTo("700");
+    }
+
+    @Test
+    void getAccount_shouldReturnAccountDetailsWithTransactions() throws Exception {
+        Account testAccount = accountRepository.findByAccountNumber("111111111111").get();
+        mockMvc.perform(get("/api/accounts/{accountNumber}", testAccount.getAccountNumber())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accountNumber").value("111111111111"))
+                .andExpect(jsonPath("$.balance").value(1000))
+                .andExpect(jsonPath("$.ownerName").value("john"))
+                .andExpect(jsonPath("$.ownerEmail").value("john@example.com"));
+
+    }
+
+    @Test
+    void getMonthlyTransactions_shouldReturnTransactionsForGivenMonth() throws Exception {
+        mockMvc.perform(get("/api/accounts/{accountNumber}/transactions", "111111111111")
+                        .param("year", "2025")
+                        .param("month", "8"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accountNumber").value("111111111111"))
+                .andExpect(jsonPath("$.year").value(2025))
+                .andExpect(jsonPath("$.month").value(8))
+                .andExpect(jsonPath("$.transactions").isArray());
     }
 }
