@@ -1,8 +1,8 @@
 package com.bank.silver.account;
 
-import com.bank.silver.account.dto.DepositRequest;
-import com.bank.silver.account.dto.TransferRequest;
-import com.bank.silver.account.dto.WithdrawRequest;
+import com.bank.silver.account.dto.request.DepositRequest;
+import com.bank.silver.account.dto.request.TransferRequest;
+import com.bank.silver.account.dto.request.WithdrawRequest;
 import com.bank.silver.account.entity.Account;
 import com.bank.silver.account.repository.AccountRepository;
 import com.bank.silver.user.entity.User;

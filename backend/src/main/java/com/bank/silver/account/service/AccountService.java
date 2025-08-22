@@ -1,12 +1,13 @@
 package com.bank.silver.account.service;
 
+import com.bank.silver.account.dto.response.AccountTransactionResponse;
+import com.bank.silver.account.dto.response.TransferResponse;
 import com.bank.silver.account.entity.Account;
 import com.bank.silver.account.entity.TransactionType;
 import com.bank.silver.account.repository.AccountRepository;
 import com.bank.silver.account.util.AccountNumberGenerator;
 import com.bank.silver.user.entity.User;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,14 +17,9 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 public class AccountService {
 
-    @Autowired
-    private AccountRepository accountRepository;
-
-    @Autowired
-    private AccountNumberGenerator accountNumberGenerator;
-
-    @Autowired
-    private TransactionService transactionService;
+    private final AccountRepository accountRepository;
+    private final AccountNumberGenerator accountNumberGenerator;
+    private final TransactionService transactionService;
 
     public Account createAccount(User owner) {
         String accountNumber;
@@ -36,7 +32,7 @@ public class AccountService {
     }
 
     @Transactional
-    public Account deposit(String accountNumber, BigDecimal amount) {
+    public AccountTransactionResponse deposit(String accountNumber, BigDecimal amount) {
         Account account = getAccountByAccountNumber(accountNumber);
 
 
@@ -44,13 +40,14 @@ public class AccountService {
             throw new IllegalArgumentException("Deposit amount must be positive");
         }
         account.deposit(amount);
-        transactionService.recordTransaction(account, amount, TransactionType.DEPOSIT);
+        transactionService.recordTransaction(account, amount, TransactionType.DEPOSIT,
+                null, null);
 
-        return accountRepository.save(account);
+        return AccountTransactionResponse.from(account, amount);
     }
 
     @Transactional
-    public Account withdraw(String accountNumber, BigDecimal amount) {
+    public AccountTransactionResponse withdraw(String accountNumber, BigDecimal amount) {
         Account account = getAccountByAccountNumber(accountNumber);
 
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
@@ -61,13 +58,14 @@ public class AccountService {
             throw new IllegalArgumentException("Insufficient balance");
         }
         account.withdraw(amount);
-        transactionService.recordTransaction(account, amount, TransactionType.WITHDRAW);
+        transactionService.recordTransaction(account, amount, TransactionType.WITHDRAW,
+                null, null);
 
-        return accountRepository.save(account);
+        return AccountTransactionResponse.from(account, amount);
     }
 
     @Transactional
-    public Account[] transfer(String sendAccountNumber, String receiveAccountNumber, BigDecimal amount) {
+    public TransferResponse transfer(String sendAccountNumber, String receiveAccountNumber, BigDecimal amount) {
         if (sendAccountNumber.equals(receiveAccountNumber)) {
             throw new IllegalArgumentException("Cannot transfer to the same account");
         }
@@ -82,15 +80,14 @@ public class AccountService {
         }
 
         sender.withdraw(amount);
-        transactionService.recordTransaction(sender, amount, TransactionType.TRANSFER_OUT);
+        transactionService.recordTransaction(sender, amount, TransactionType.TRANSFER_OUT,
+                receiver.getAccountNumber(), receiver.getOwner().getUsername());
 
         receiver.deposit(amount);
-        transactionService.recordTransaction(receiver, amount, TransactionType.TRANSFER_IN);
+        transactionService.recordTransaction(receiver, amount, TransactionType.TRANSFER_IN,
+                sender.getAccountNumber(), sender.getOwner().getUsername());
 
-        accountRepository.save(sender);
-        accountRepository.save(receiver);
-
-        return new Account[]{sender, receiver};
+        return TransferResponse.from(sender, receiver, amount);
     }
 
     public Account getAccountByAccountNumber(String accountNumber) {

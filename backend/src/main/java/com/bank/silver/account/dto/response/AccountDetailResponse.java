@@ -1,4 +1,4 @@
-package com.bank.silver.account.dto;
+package com.bank.silver.account.dto.response;
 
 import com.bank.silver.account.entity.Account;
 import com.bank.silver.account.entity.Transaction;

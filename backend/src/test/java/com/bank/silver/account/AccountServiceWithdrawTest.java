@@ -1,5 +1,6 @@
 package com.bank.silver.account;
 
+import com.bank.silver.account.dto.response.AccountTransactionResponse;
 import com.bank.silver.account.entity.Account;
 import com.bank.silver.account.repository.AccountRepository;
 import com.bank.silver.account.service.AccountService;
@@ -44,9 +45,9 @@ public class AccountServiceWithdrawTest {
                 .thenReturn(Optional.of(account));
         when(accountRepository.save(account)).thenReturn(account);
 
-        Account result = accountService.withdraw("123456789012", BigDecimal.valueOf(200));
+        AccountTransactionResponse result = accountService.withdraw("123456789012", BigDecimal.valueOf(200));
 
-        assertThat(result.getBalance()).isEqualByComparingTo("800");
+        assertThat(result.balance()).isEqualByComparingTo("800");
     }
 
     @Test

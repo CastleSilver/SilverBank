@@ -23,6 +23,13 @@ public class Transaction {
     private BigDecimal amount;
 
     @Column(nullable = false)
+    private BigDecimal balanceAfter;
+
+    private String counterpartyAccountNumber;
+
+    private String counterpartyName;
+
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -31,10 +38,14 @@ public class Transaction {
 
     protected Transaction() {}
 
-    public Transaction(TransactionType type, BigDecimal amount, Account account) {
+    public Transaction(TransactionType type, BigDecimal amount, BigDecimal balanceAfter,
+                       String counterpartyAccountNumber, String counterpartyName, Account account) {
         this.type = type;
         this.amount = amount;
         this.account = account;
+        this.balanceAfter = balanceAfter;
+        this.counterpartyAccountNumber = counterpartyAccountNumber;
+        this.counterpartyName = counterpartyName;
         this.createdAt = LocalDateTime.now();
     }
 }

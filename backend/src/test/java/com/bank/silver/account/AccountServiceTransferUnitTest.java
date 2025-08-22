@@ -63,8 +63,10 @@ public class AccountServiceTransferUnitTest {
         assertThat(from.getBalance()).isEqualByComparingTo("800");
         assertThat(to.getBalance()).isEqualByComparingTo("700");
 
-        verify(transactionService).recordTransaction(from, BigDecimal.valueOf(200), TransactionType.TRANSFER_OUT);
-        verify(transactionService).recordTransaction(to, BigDecimal.valueOf(200), TransactionType.TRANSFER_IN);
+        verify(transactionService).recordTransaction(from, BigDecimal.valueOf(200), TransactionType.TRANSFER_OUT,
+                to.getAccountNumber(), to.getOwner().getUsername());
+        verify(transactionService).recordTransaction(to, BigDecimal.valueOf(200), TransactionType.TRANSFER_IN,
+                from.getAccountNumber(), from.getOwner().getUsername());
     }
 
 }

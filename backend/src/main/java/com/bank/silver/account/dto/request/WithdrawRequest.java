@@ -1,4 +1,4 @@
-package com.bank.silver.account.dto;
+package com.bank.silver.account.dto.request;
 
 import java.math.BigDecimal;
 

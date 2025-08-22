@@ -1,6 +1,8 @@
 package com.bank.silver.account;
 
 import com.bank.silver.account.controller.AccountController;
+import com.bank.silver.account.dto.response.AccountTransactionResponse;
+import com.bank.silver.account.dto.response.TransferResponse;
 import com.bank.silver.account.entity.Account;
 import com.bank.silver.account.service.AccountService;
 import com.bank.silver.user.entity.User;
@@ -41,7 +43,7 @@ public class AccountControllerTest {
         //given
         Account account = new Account("111111111111", BigDecimal.valueOf(1000), new User("john", "password1234", "john@example.com"));
         when(accountService.deposit("111111111111", BigDecimal.valueOf(200)))
-                .thenReturn(account);
+                .thenReturn(new AccountTransactionResponse(account.getAccountNumber(), BigDecimal.valueOf(200), account.getBalance()));
 
         //when & then
         mockMvc.perform(post("/api/accounts/deposit")
@@ -57,7 +59,7 @@ public class AccountControllerTest {
         //given
         Account account = new Account("111111111111", BigDecimal.valueOf(800), new User("john", "password123", "john@example.com"));
         when(accountService.withdraw("111111111111", BigDecimal.valueOf(200)))
-                .thenReturn(account);
+                .thenReturn(new AccountTransactionResponse(account.getAccountNumber(), BigDecimal.valueOf(200), account.getBalance()));
 
         //when & then
         mockMvc.perform(post("/api/accounts/withdraw")
@@ -74,14 +76,15 @@ public class AccountControllerTest {
         Account to = new Account("222222222222", BigDecimal.valueOf(1200), new User("john2", "password123", "john2@example.com"));
 
         when(accountService.transfer("111111111111", "222222222222", BigDecimal.valueOf(200)))
-                .thenReturn(new Account[]{from, to});
+                .thenReturn(new TransferResponse(from.getAccountNumber(), BigDecimal.valueOf(200), BigDecimal.valueOf(600),
+                        to.getAccountNumber(), BigDecimal.valueOf(1000)));
 
         //when & then
         mockMvc.perform(post("/api/accounts/transfer")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"fromAccount\":\"111111111111\",\"toAccount\":\"222222222222\",\"amount\":200}"))
+                        .content("{\"fromAccountNumber\":\"111111111111\",\"toAccountNumber\":\"222222222222\",\"amount\":200}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].balance").value(800))
-                .andExpect(jsonPath("$[1].balance").value(1200));
+                .andExpect(jsonPath("$.fromBalance").value(600))
+                .andExpect(jsonPath("$.toBalance").value(1000));
     }
 }

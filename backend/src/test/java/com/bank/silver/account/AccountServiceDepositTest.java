@@ -1,5 +1,6 @@
 package com.bank.silver.account;
 
+import com.bank.silver.account.dto.response.AccountTransactionResponse;
 import com.bank.silver.account.entity.Account;
 import com.bank.silver.account.repository.AccountRepository;
 import com.bank.silver.account.service.AccountService;
@@ -50,10 +51,10 @@ public class AccountServiceDepositTest {
                 });
 
         //when
-        Account updatedAccount = accountService.deposit("123456789012", new BigDecimal("500"));
+        AccountTransactionResponse transactionResponse = accountService.deposit("123456789012", new BigDecimal("500"));
 
         //then
-        assertThat(updatedAccount.getBalance()).isEqualTo(new BigDecimal("1500"));
+        assertThat(transactionResponse.balance()).isEqualTo(new BigDecimal("1500"));
     }
 
 }
