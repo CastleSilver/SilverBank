@@ -30,12 +30,18 @@ public record AccountDetailResponse(
 
     public record TransactionDto(
             BigDecimal amount,
+            BigDecimal balanceAfter,
+            String counterpartyAccountNumber,
+            String counterpartyName,
             TransactionType type,
             LocalDateTime createdAt
     ) {
         public static TransactionDto from(Transaction transaction) {
             return new TransactionDto(
                     transaction.getAmount(),
+                    transaction.getBalanceAfter(),
+                    transaction.getCounterpartyAccountNumber(),
+                    transaction.getCounterpartyName(),
                     transaction.getType(),
                     transaction.getCreatedAt()
             );

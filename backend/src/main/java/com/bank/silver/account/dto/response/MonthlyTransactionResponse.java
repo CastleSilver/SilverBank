@@ -2,6 +2,7 @@ package com.bank.silver.account.dto.response;
 
 import com.bank.silver.account.entity.Transaction;
 
+import java.util.Comparator;
 import java.util.List;
 
 public record MonthlyTransactionResponse(
@@ -15,7 +16,8 @@ public record MonthlyTransactionResponse(
                 accountNumber,
                 year,
                 month,
-                txs.stream().map(AccountDetailResponse.TransactionDto::from).toList()
+                txs.stream().map(AccountDetailResponse.TransactionDto::from)
+                        .sorted(Comparator.comparing(AccountDetailResponse.TransactionDto::createdAt)).toList()
         );
     }
 }

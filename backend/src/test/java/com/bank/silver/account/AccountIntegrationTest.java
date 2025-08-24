@@ -5,6 +5,7 @@ import com.bank.silver.account.dto.request.TransferRequest;
 import com.bank.silver.account.dto.request.WithdrawRequest;
 import com.bank.silver.account.entity.Account;
 import com.bank.silver.account.repository.AccountRepository;
+import com.bank.silver.account.service.AccountService;
 import com.bank.silver.user.entity.User;
 import com.bank.silver.user.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -43,6 +45,9 @@ public class AccountIntegrationTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private AccountService accountService;
 
     private User sender;
     private User receiver;
@@ -132,5 +137,37 @@ public class AccountIntegrationTest {
                 .andExpect(jsonPath("$.year").value(2025))
                 .andExpect(jsonPath("$.month").value(8))
                 .andExpect(jsonPath("$.transactions").isArray());
+    }
+
+    @Test
+    void getMonthlyTransactions_shouldReturnCorrectTransactions() throws Exception {
+        // given: 계좌 생성 및 초기 입금
+        Account account = accountService.createAccount(sender);
+        accountService.deposit(account.getAccountNumber(), BigDecimal.valueOf(1000));
+        accountService.withdraw(account.getAccountNumber(), BigDecimal.valueOf(200));
+        accountService.deposit(account.getAccountNumber(), BigDecimal.valueOf(300));
+
+        int year = LocalDate.now().getYear();
+        int month = LocalDate.now().getMonthValue();
+
+        // when & then
+        mockMvc.perform(get("/api/accounts/{accountNumber}/transactions", account.getAccountNumber())
+                        .param("year", String.valueOf(year))
+                        .param("month", String.valueOf(month)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accountNumber").value(account.getAccountNumber()))
+                .andExpect(jsonPath("$.year").value(year))
+                .andExpect(jsonPath("$.month").value(month))
+                .andExpect(jsonPath("$.transactions").isArray())
+                .andExpect(jsonPath("$.transactions.length()").value(3))
+                .andExpect(jsonPath("$.transactions[0].type").value("DEPOSIT"))
+                .andExpect(jsonPath("$.transactions[0].amount").value(1000))
+                .andExpect(jsonPath("$.transactions[0].balanceAfter").value(1000))
+                .andExpect(jsonPath("$.transactions[1].type").value("WITHDRAW"))
+                .andExpect(jsonPath("$.transactions[1].amount").value(200))
+                .andExpect(jsonPath("$.transactions[1].balanceAfter").value(800))
+                .andExpect(jsonPath("$.transactions[2].type").value("DEPOSIT"))
+                .andExpect(jsonPath("$.transactions[2].amount").value(300))
+                .andExpect(jsonPath("$.transactions[2].balanceAfter").value(1100));
     }
 }
