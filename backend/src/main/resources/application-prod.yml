@@ -1,0 +1,27 @@
+server:
+  port: 8080
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/bankdb
+    username: postgres
+    password: 12345678
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+      show-sql: false
+  jwt:
+    secret: silverbank
+    expirationMs: 3600000
+  profiles: prod
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true

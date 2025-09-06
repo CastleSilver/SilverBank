@@ -9,7 +9,7 @@ import java.util.Date;
 
 @Component
 public class JWTUtils {
-    @Value("${spring.jwt.secret-key}")
+    @Value("${spring.jwt.secret}")
     private String jwtSecret;
     @Value("${spring.jwt.expirationMs}")
     private long jwtExpirationMs;
