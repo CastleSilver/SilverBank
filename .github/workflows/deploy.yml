@@ -9,10 +9,6 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: ./backend  # Gradle 프로젝트 위치
-
     steps:
       # 1. 코드 체크아웃
       - name: Checkout repository
@@ -38,12 +34,13 @@ jobs:
 
       # 4. Gradle 빌드 (테스트 제외)
       - name: Build with Gradle
-        run: |
-          ./gradlew clean build -x test
+        run: ./gradlew clean build -x test
+        working-directory: ./backend
 
       # 5. JAR 아티팩트 확인
       - name: Check JAR existence
         id: jar-check
+        working-directory: ./backend
         run: |
           if ls build/libs/*.jar 1> /dev/null 2>&1; then
             echo "JAR_EXISTS=true" >> $GITHUB_ENV
@@ -51,8 +48,8 @@ jobs:
             echo "JAR_EXISTS=false" >> $GITHUB_ENV
           fi
 
-      # 6. JAR & 서비스 파일 배포
-      - name: Deploy artifacts to EC2
+      # 6. JAR 배포
+      - name: Deploy JAR to EC2
         if: env.JAR_EXISTS == 'true'
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -60,23 +57,31 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
-          source: |
-            backend/build/libs/*.jar
-            .github/deploy/silverbank.service
+          source: "backend/build/libs/*.jar"
           target: "/home/silverbank/app/"
+          
+      # # 7. 서비스 파일 배포
+      # - name: Deploy systemd service file
+      #   uses: appleboy/scp-action@v0.1.7
+      #   with:
+      #     host: ${{ secrets.EC2_HOST }}
+      #     username: ${{ secrets.EC2_USER }}
+      #     key: ${{ secrets.EC2_SSH_KEY }}
+      #     port: 22
+      #     source: ".github/deploy/silverbank.service"
+      #     target: "/home/silverbank/app/"
 
-      # 7. EC2에서 서비스 재시작
-      - name: Restart SilverBank service
-        if: env.JAR_EXISTS == 'true'
-        uses: appleboy/ssh-action@v0.1.7
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          port: 22
-          script: |
-            sudo mv /home/silverbank/app/silverbank.service /etc/systemd/system/silverbank.service
-            sudo systemctl daemon-reload
-            sudo systemctl enable silverbank.service
-            sudo systemctl restart silverbank.service
-            sudo systemctl status silverbank.service --no-pager
+      # # 8. 서비스 리로드 + 재시작
+      # - name: Restart SilverBank service
+      #   uses: appleboy/ssh-action@v0.1.7
+      #   with:
+      #     host: ${{ secrets.EC2_HOST }}
+      #     username: ${{ secrets.EC2_USER }}
+      #     key: ${{ secrets.EC2_SSH_KEY }}
+      #     port: 22
+      #     script: |
+      #       sudo mv /home/silverbank/app/silverbank.service /etc/systemd/system/silverbank.service
+      #       sudo systemctl daemon-reload
+      #       sudo systemctl enable silverbank.service
+      #       sudo systemctl restart silverbank.service
+      #       sudo systemctl status silverbank.service --no-pager
