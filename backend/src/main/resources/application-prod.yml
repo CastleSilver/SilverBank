@@ -15,7 +15,9 @@ spring:
   jwt:
     secret: silverbank
     expirationMs: 3600000
-  profiles: prod
+  config:
+    activate:
+      on-profile: prod
 management:
   endpoints:
     web:
