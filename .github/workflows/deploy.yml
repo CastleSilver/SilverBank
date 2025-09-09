@@ -40,6 +40,7 @@ jobs:
       # 5. JAR 아티팩트 확인
       - name: Check JAR existence
         id: jar-check
+        working-directory: ./backend
         run: |
           if ls build/libs/*.jar 1> /dev/null 2>&1; then
             echo "JAR_EXISTS=true" >> $GITHUB_ENV
