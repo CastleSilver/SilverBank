@@ -47,6 +47,11 @@ jobs:
           else
             echo "JAR_EXISTS=false" >> $GITHUB_ENV
           fi
+          
+      # 5-1. 빌드 결과 확인
+      - name: List build/libs
+        working-directory: ./backend
+        run: ls -l build/libs/
 
       # 6. application-prod.yml 업로드
       - name: Upload application-prod.yml
@@ -68,7 +73,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
-          source: "./backend/build/libs/silver-0.0.1-SNAPSHOT.jar"
+          source: "./backend/build/libs/*.jar"
           target: "/home/silverbank/app/"
           
       # 8. 서비스 파일 배포
