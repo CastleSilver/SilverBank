@@ -1,16 +1,15 @@
 [Unit]
-Description=SilverBank Spring Boot App
+Description=SilverBank Spring Boot Application
 After=network.target
 
 [Service]
-User=ec2-user
-WorkingDirectory=/home/ec2-user/app
-ExecStart=/usr/bin/java -jar /home/ec2-user/app/silver-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
+User=silverbank
+Group=silverbank
+WorkingDirectory=/home/silverbank/app
+ExecStart=/usr/bin/java -jar /home/silverbank/app/silver-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
 SuccessExitStatus=143
 Restart=on-failure
 RestartSec=5
-StandardOutput=journal
-StandardError=journal
 
 [Install]
 WantedBy=multi-user.target
