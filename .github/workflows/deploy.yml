@@ -34,7 +34,7 @@ jobs:
 
       # 4. Gradle 빌드 (테스트 제외)
       - name: Build with Gradle
-        run: ./gradlew clean build -x test
+        run: ./backend/gradlew clean build -x test
 
       # 5. JAR 아티팩트 확인
       - name: Check JAR existence
