@@ -4,12 +4,11 @@ After=network.target
 
 [Service]
 User=silverbank
-Group=silverbank
-WorkingDirectory=/home/silverbank/app
-ExecStart=/usr/bin/java -jar /home/silverbank/app/silver-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
+WorkingDirectory=/home/silverbank/app/backend/build/libs
+ExecStart=/usr/bin/java -jar /home/silverbank/app/backend/build/libs/silver-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
 SuccessExitStatus=143
-Restart=on-failure
-RestartSec=5
+Restart=always
+RestartSec=10
 
 [Install]
 WantedBy=multi-user.target
