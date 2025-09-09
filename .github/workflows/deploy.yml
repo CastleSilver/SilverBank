@@ -59,28 +59,28 @@ jobs:
           source: "backend/build/libs/*.jar"
           target: "/home/silverbank/app/"
           
-      # 7. 서비스 파일 배포
-      - name: Deploy systemd service file
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          port: 22
-          source: ".github/deploy/silverbank.service"
-          target: "/home/silverbank/app/"
+      # # 7. 서비스 파일 배포
+      # - name: Deploy systemd service file
+      #   uses: appleboy/scp-action@v0.1.7
+      #   with:
+      #     host: ${{ secrets.EC2_HOST }}
+      #     username: ${{ secrets.EC2_USER }}
+      #     key: ${{ secrets.EC2_SSH_KEY }}
+      #     port: 22
+      #     source: ".github/deploy/silverbank.service"
+      #     target: "/home/silverbank/app/"
 
-      # 8. 서비스 리로드 + 재시작
-      - name: Restart SilverBank service
-        uses: appleboy/ssh-action@v0.1.7
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          port: 22
-          script: |
-            sudo mv /home/silverbank/app/silverbank.service /etc/systemd/system/silverbank.service
-            sudo systemctl daemon-reload
-            sudo systemctl enable silverbank.service
-            sudo systemctl restart silverbank.service
-            sudo systemctl status silverbank.service --no-pager
+      # # 8. 서비스 리로드 + 재시작
+      # - name: Restart SilverBank service
+      #   uses: appleboy/ssh-action@v0.1.7
+      #   with:
+      #     host: ${{ secrets.EC2_HOST }}
+      #     username: ${{ secrets.EC2_USER }}
+      #     key: ${{ secrets.EC2_SSH_KEY }}
+      #     port: 22
+      #     script: |
+      #       sudo mv /home/silverbank/app/silverbank.service /etc/systemd/system/silverbank.service
+      #       sudo systemctl daemon-reload
+      #       sudo systemctl enable silverbank.service
+      #       sudo systemctl restart silverbank.service
+      #       sudo systemctl status silverbank.service --no-pager
