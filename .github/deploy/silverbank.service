@@ -1,0 +1,12 @@
+[Unit]
+Description=SilverBank Application
+After=network.target
+
+[Service]
+User=silverbank
+WorkingDirectory=/home/silverbank/app
+ExecStart=/usr/bin/java -jar /home/silverbank/app/SilverBank.jar
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
