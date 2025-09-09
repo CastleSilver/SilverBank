@@ -48,7 +48,18 @@ jobs:
             echo "JAR_EXISTS=false" >> $GITHUB_ENV
           fi
 
-      # 6. JAR 배포
+      # 6. application-prod.yml 업로드
+      - name: Upload application-prod.yml
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          source: "src/main/resources/application-prod.yml"
+          target: "/home/silverbank/app/"
+
+      # 7. JAR 배포
       - name: Deploy JAR to EC2
         if: env.JAR_EXISTS == 'true'
         uses: appleboy/scp-action@v0.1.7
@@ -57,31 +68,36 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
-          source: "backend/build/libs/*.jar"
+          source: "backend/build/libs/silver-0.0.1-SNAPSHOT.jar"
           target: "/home/silverbank/app/"
           
-      # # 7. 서비스 파일 배포
-      # - name: Deploy systemd service file
-      #   uses: appleboy/scp-action@v0.1.7
-      #   with:
-      #     host: ${{ secrets.EC2_HOST }}
-      #     username: ${{ secrets.EC2_USER }}
-      #     key: ${{ secrets.EC2_SSH_KEY }}
-      #     port: 22
-      #     source: ".github/deploy/silverbank.service"
-      #     target: "/home/silverbank/app/"
+      # 8. 서비스 파일 배포
+      - name: Deploy systemd service file
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          source: ".github/deploy/silverbank.service"
+          target: "/home/silverbank/app/"
 
-      # # 8. 서비스 리로드 + 재시작
-      # - name: Restart SilverBank service
-      #   uses: appleboy/ssh-action@v0.1.7
-      #   with:
-      #     host: ${{ secrets.EC2_HOST }}
-      #     username: ${{ secrets.EC2_USER }}
-      #     key: ${{ secrets.EC2_SSH_KEY }}
-      #     port: 22
-      #     script: |
-      #       sudo mv /home/silverbank/app/silverbank.service /etc/systemd/system/silverbank.service
-      #       sudo systemctl daemon-reload
-      #       sudo systemctl enable silverbank.service
-      #       sudo systemctl restart silverbank.service
-      #       sudo systemctl status silverbank.service --no-pager
+      # 8. 서비스 리로드 + 재시작
+      - name: Restart SilverBank service
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            # 서비스 파일 복사, 권한 설정
+            sudo cp /home/silverbank/app/silverbank.service /etc/systemd/system/silverbank.service
+            sudo chown root:root /etc/systemd/system/silverbank.service
+            sudo chmod 644 /etc/systemd/system/silverbank.service
+
+            # daemon reload & 서비스 재시작
+            sudo systemctl daemon-reload
+            sudo systemctl restart silverbank.service
+            sudo systemctl enable silverbank.service
+            sudo systemctl status silverbank.service --no-pager
